@@ -46,10 +46,18 @@
             android:layout_marginTop="6dp"
             android:text="2. 접근성 서비스 활성화" />
 
+        <CheckBox
+            android:id="@+id/cbAntiDetection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:checked="true"
+            android:text="탐지 방지 모드 (X/Y·시간 랜덤 + 미세 흔들림 + 곡선 드래그)" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="14dp"
             android:text="전체 시퀀스 반복 횟수 (0 = 무한 반복)"
             android:textStyle="bold" />
 

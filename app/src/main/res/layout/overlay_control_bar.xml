@@ -28,14 +28,22 @@
 
     <Button
         android:id="@+id/btnPlayStop"
-        android:layout_width="82dp"
+        android:layout_width="86dp"
         android:layout_height="38dp"
         android:text="실행"
         android:textSize="12sp" />
 
     <Button
+        android:id="@+id/btnAntiDetectToggle"
+        android:layout_width="86dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="3dp"
+        android:text="방지:ON"
+        android:textSize="11sp" />
+
+    <Button
         android:id="@+id/btnAddClick"
-        android:layout_width="82dp"
+        android:layout_width="86dp"
         android:layout_height="38dp"
         android:layout_marginTop="3dp"
         android:text="+클릭"
@@ -43,7 +51,7 @@
 
     <Button
         android:id="@+id/btnAddDrag"
-        android:layout_width="82dp"
+        android:layout_width="86dp"
         android:layout_height="38dp"
         android:layout_marginTop="3dp"
         android:text="+드래그"
@@ -51,7 +59,7 @@
 
     <Button
         android:id="@+id/btnRemoveLast"
-        android:layout_width="82dp"
+        android:layout_width="86dp"
         android:layout_height="38dp"
         android:layout_marginTop="3dp"
         android:text="-제거"
@@ -59,7 +67,7 @@
 
     <Button
         android:id="@+id/btnToggleHide"
-        android:layout_width="82dp"
+        android:layout_width="86dp"
         android:layout_height="38dp"
         android:layout_marginTop="3dp"
         android:text="숨기기"
@@ -67,7 +75,7 @@
 
     <Button
         android:id="@+id/btnSavePreset"
-        android:layout_width="82dp"
+        android:layout_width="86dp"
         android:layout_height="38dp"
         android:layout_marginTop="3dp"
         android:text="저장"
@@ -75,7 +83,7 @@
 
     <Button
         android:id="@+id/btnLoadPreset"
-        android:layout_width="82dp"
+        android:layout_width="86dp"
         android:layout_height="38dp"
         android:layout_marginTop="3dp"
         android:text="불러오기"
@@ -83,7 +91,7 @@
 
     <Button
         android:id="@+id/btnCloseOverlay"
-        android:layout_width="82dp"
+        android:layout_width="86dp"
         android:layout_height="38dp"
         android:layout_marginTop="3dp"
         android:text="닫기"
