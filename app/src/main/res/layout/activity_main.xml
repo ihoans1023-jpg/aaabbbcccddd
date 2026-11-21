@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="정밀 오토마우스 설정"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvOverlayStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="오버레이 권한 확인 중..."
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/btnRequestOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="1. 다른 앱 위에 표시 권한 허용" />
+
+        <TextView
+            android:id="@+id/tvAccessStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="접근성 서비스 확인 중..."
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/btnOpenAccessibility"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="2. 접근성 서비스 활성화" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="전체 시퀀스 반복 횟수 (0 = 무한 반복)"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etGlobalCycles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="0" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="터치 씹힘 방지 최소 쿨다운 (ms, 권장 10~15ms)"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etMinCooldownMs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="12" />
+
+        <CheckBox
+            android:id="@+id/cbPauseOnExternalTouch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:checked="true"
+            android:text="외부 클릭(직접 터치) 감지 시 즉시 일시정지" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="외부 터치 종료 후 자동 재개 대기 (ms)"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etExternalResumeDelayMs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="1500" />
+
+        <Button
+            android:id="@+id/btnLaunchOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="플로팅 제어바 실행" />
+    </LinearLayout>
+</ScrollView>

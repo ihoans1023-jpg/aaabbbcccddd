@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#E61E293B"
+    android:orientation="vertical"
+    android:padding="6dp">
+
+    <TextView
+        android:id="@+id/tvDragHandle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="::: 이동 :::"
+        android:textColor="#CBD5E1"
+        android:textSize="11sp" />
+
+    <TextView
+        android:id="@+id/tvEngineState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingBottom="4dp"
+        android:text="대기"
+        android:textColor="#38BDF8"
+        android:textSize="10sp" />
+
+    <Button
+        android:id="@+id/btnPlayStop"
+        android:layout_width="82dp"
+        android:layout_height="38dp"
+        android:text="실행"
+        android:textSize="12sp" />
+
+    <Button
+        android:id="@+id/btnAddClick"
+        android:layout_width="82dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="3dp"
+        android:text="+클릭"
+        android:textSize="12sp" />
+
+    <Button
+        android:id="@+id/btnAddDrag"
+        android:layout_width="82dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="3dp"
+        android:text="+드래그"
+        android:textSize="12sp" />
+
+    <Button
+        android:id="@+id/btnRemoveLast"
+        android:layout_width="82dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="3dp"
+        android:text="-제거"
+        android:textSize="12sp" />
+
+    <Button
+        android:id="@+id/btnToggleHide"
+        android:layout_width="82dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="3dp"
+        android:text="숨기기"
+        android:textSize="12sp" />
+
+    <Button
+        android:id="@+id/btnSavePreset"
+        android:layout_width="82dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="3dp"
+        android:text="저장"
+        android:textSize="12sp" />
+
+    <Button
+        android:id="@+id/btnLoadPreset"
+        android:layout_width="82dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="3dp"
+        android:text="불러오기"
+        android:textSize="11sp" />
+
+    <Button
+        android:id="@+id/btnCloseOverlay"
+        android:layout_width="82dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="3dp"
+        android:text="닫기"
+        android:textSize="12sp" />
+
+</LinearLayout>
