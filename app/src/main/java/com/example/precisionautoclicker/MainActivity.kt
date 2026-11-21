@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tvOverlayStatus: TextView
     private lateinit var tvAccessStatus: TextView
+    private lateinit var cbAntiDetection: CheckBox
     private lateinit var etGlobalCycles: EditText
     private lateinit var etMinCooldown: EditText
     private lateinit var cbPauseOnExternalTouch: CheckBox
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         tvOverlayStatus = findViewById(R.id.tvOverlayStatus)
         tvAccessStatus = findViewById(R.id.tvAccessStatus)
+        cbAntiDetection = findViewById(R.id.cbAntiDetection)
         etGlobalCycles = findViewById(R.id.etGlobalCycles)
         etMinCooldown = findViewById(R.id.etMinCooldownMs)
         cbPauseOnExternalTouch = findViewById(R.id.cbPauseOnExternalTouch)
@@ -64,12 +66,14 @@ class MainActivity : AppCompatActivity() {
             val cooldown = etMinCooldown.text.toString().toLongOrNull() ?: 12L
             val pauseOnExt = cbPauseOnExternalTouch.isChecked
             val resumeDelay = etExternalResumeDelayMs.text.toString().toLongOrNull() ?: 1500L
+            val antiDetect = cbAntiDetection.isChecked
 
             val intent = Intent(this, OverlayService::class.java).apply {
                 putExtra(OverlayService.EXTRA_GLOBAL_CYCLES, cycles)
                 putExtra(OverlayService.EXTRA_MIN_COOLDOWN_MS, cooldown)
                 putExtra(OverlayService.EXTRA_PAUSE_ON_EXT_TOUCH, pauseOnExt)
                 putExtra(OverlayService.EXTRA_EXT_RESUME_DELAY_MS, resumeDelay)
+                putExtra(OverlayService.EXTRA_ANTI_DETECTION, antiDetect)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(intent)

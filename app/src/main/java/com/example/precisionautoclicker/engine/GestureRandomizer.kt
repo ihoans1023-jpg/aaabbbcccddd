@@ -10,9 +10,6 @@ import kotlin.math.roundToLong
 object GestureRandomizer {
     private val random = Random()
 
-    /**
-     * 1% 단위 확률 판정 (0% -> 항상 false, 100% -> 항상 true)
-     */
     fun shouldTrigger(probabilityPct: Int): Boolean {
         val clamped = probabilityPct.coerceIn(0, 100)
         if (clamped == 0) return false
@@ -20,18 +17,21 @@ object GestureRandomizer {
         return random.nextInt(100) < clamped
     }
 
-    /**
-     * X, Y 축별 [-range, +range] 사각 영역 균등 랜덤 좌표 산출
-     * 예: rangeXPx = 10, rangeYPx = 10 -> 왼쪽 10 ~ 오른쪽 10 (20px) × 위 10 ~ 아래 10 (20px) 넓이에서 균등 추출
-     */
     fun resolvePoint(
         baseX: Float,
         baseY: Float,
         rangeXPx: Int,
         rangeYPx: Int,
         screenWidth: Int,
-        screenHeight: Int
+        screenHeight: Int,
+        antiDetectionEnabled: Boolean
     ): PointF {
+        if (!antiDetectionEnabled) {
+            return PointF(
+                baseX.coerceIn(1f, (screenWidth - 1).coerceAtLeast(1).toFloat()),
+                baseY.coerceIn(1f, (screenHeight - 1).coerceAtLeast(1).toFloat())
+            )
+        }
         val dx = if (rangeXPx > 0) (random.nextFloat() * 2f - 1f) * rangeXPx else 0f
         val dy = if (rangeYPx > 0) (random.nextFloat() * 2f - 1f) * rangeYPx else 0f
         val finalX = (baseX + dx).coerceIn(1f, (screenWidth - 1).coerceAtLeast(1).toFloat())
@@ -39,11 +39,9 @@ object GestureRandomizer {
         return PointF(finalX, finalY)
     }
 
-    /**
-     * 1ms 단위 누름 유지 시간 산출 (최소 1ms 보장)
-     */
-    fun resolveHoldDurationMs(node: ActionNode): Long {
+    fun resolveHoldDurationMs(node: ActionNode, antiDetectionEnabled: Boolean): Long {
         val base = node.holdDurationMs.coerceAtLeast(1L)
+        if (!antiDetectionEnabled) return base
         val variance = node.holdRandomMs.coerceAtLeast(0L)
         if (variance == 0L) return base
         val delta = ((random.nextFloat() * 2f - 1f) * variance).roundToLong()
@@ -51,11 +49,9 @@ object GestureRandomizer {
         return (base + delta).coerceAtLeast(1L)
     }
 
-    /**
-     * 1ms 단위 대기 시간 산출 (최소 0ms)
-     */
-    fun resolveNextDelayMs(node: ActionNode): Long {
+    fun resolveNextDelayMs(node: ActionNode, antiDetectionEnabled: Boolean): Long {
         val base = node.nextDelayMs.coerceAtLeast(0L)
+        if (!antiDetectionEnabled) return base
         val variance = node.nextDelayRandomMs.coerceAtLeast(0L)
         if (variance == 0L) return base
         val delta = ((random.nextFloat() * 2f - 1f) * variance).roundToLong()
@@ -64,12 +60,14 @@ object GestureRandomizer {
     }
 
     /**
-     * 클릭 또는 곡선 드래그 Path 생성
+     * 탐지 방지 ON: 좌표 랜덤 + 클릭 미세 흔들림(1.5px) + 곡선 드래그
+     * 탐지 방지 OFF: 정확한 고정 좌표 + 정점 클릭 + 직선 드래그
      */
     fun buildStrokePath(
         node: ActionNode,
         screenWidth: Int,
-        screenHeight: Int
+        screenHeight: Int,
+        antiDetectionEnabled: Boolean
     ): Path {
         val start = resolvePoint(
             node.startX,
@@ -77,7 +75,8 @@ object GestureRandomizer {
             node.randomXRangePx,
             node.randomYRangePx,
             screenWidth,
-            screenHeight
+            screenHeight,
+            antiDetectionEnabled
         )
         val path = Path()
         path.moveTo(start.x, start.y)
@@ -89,13 +88,14 @@ object GestureRandomizer {
                 node.randomXRangePx,
                 node.randomYRangePx,
                 screenWidth,
-                screenHeight
+                screenHeight,
+                antiDetectionEnabled
             )
-            val midX = (start.x + end.x) / 2f
-            val midY = (start.y + end.y) / 2f
             val dist = hypot((end.x - start.x).toDouble(), (end.y - start.y).toDouble()).toFloat()
 
-            if (dist > 10f) {
+            if (antiDetectionEnabled && dist > 10f) {
+                val midX = (start.x + end.x) / 2f
+                val midY = (start.y + end.y) / 2f
                 val nx = -(end.y - start.y) / dist
                 val ny = (end.x - start.x) / dist
                 val curveAmp = ((random.nextFloat() * 2f - 1f) * (dist * 0.06f)).coerceIn(-24f, 24f)
@@ -105,6 +105,12 @@ object GestureRandomizer {
             } else {
                 path.lineTo(end.x, end.y)
             }
+        } else if (antiDetectionEnabled) {
+            val microDx = if (random.nextBoolean()) 1.5f else -1.5f
+            val microDy = if (random.nextBoolean()) 1.5f else -1.5f
+            val endX = (start.x + microDx).coerceIn(1f, (screenWidth - 1).coerceAtLeast(1).toFloat())
+            val endY = (start.y + microDy).coerceIn(1f, (screenHeight - 1).coerceAtLeast(1).toFloat())
+            path.lineTo(endX, endY)
         }
         return path
     }

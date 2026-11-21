@@ -39,7 +39,9 @@ data class ExecutionConfig(
     // 외부 클릭(사용자 직접 터치) 감지 시 자동 일시정지 후 재개 여부
     val pauseOnExternalTouch: Boolean = true,
     // 외부 클릭이 끝난 후 자동 재개까지 대기 시간(ms)
-    val externalTouchResumeDelayMs: Long = 1500L
+    val externalTouchResumeDelayMs: Long = 1500L,
+    // 탐지 방지 모드 (ON: 좌표·시간 랜덤 + 클릭 미세 흔들림 + 곡선 드래그 일괄 적용 / OFF: 정확한 고정 좌표·시간)
+    val antiDetectionEnabled: Boolean = true
 )
 
 @Serializable

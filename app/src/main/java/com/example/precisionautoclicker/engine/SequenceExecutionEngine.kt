@@ -54,9 +54,6 @@ class SequenceExecutionEngine(private val context: Context) {
         }
     }
 
-    /**
-     * OverlayService의 ACTION_OUTSIDE 감지기에서도 직접 호출 가능
-     */
     fun notifyExternalTouchActivity() {
         if (executionJob?.isActive != true || !currentConfig.pauseOnExternalTouch) return
         onExternalTouchDetected()
@@ -116,11 +113,14 @@ class SequenceExecutionEngine(private val context: Context) {
                         for (rep in 0 until repeats) {
                             if (!isActive) break
 
-                            // 외부 클릭 감지 시 외부 조작이 끝날 때까지 즉시 대기 (일시정지)
                             while (isActive && isPausedExternally) {
                                 delay(30L)
                             }
                             if (!isActive) break
+
+                            val liveConfig = configProvider()
+                            currentConfig = liveConfig
+                            val antiDetect = liveConfig.antiDetectionEnabled
 
                             _status.value = ExecutionStatus(
                                 isRunning = true,
@@ -131,10 +131,14 @@ class SequenceExecutionEngine(private val context: Context) {
                                 totalSkippedByProb = skippedCount
                             )
 
-                            // 1% 단위 확률 체크
                             if (GestureRandomizer.shouldTrigger(node.triggerProbabilityPct)) {
-                                val path = GestureRandomizer.buildStrokePath(node, screenW, screenH)
-                                val holdMs = GestureRandomizer.resolveHoldDurationMs(node)
+                                val path = GestureRandomizer.buildStrokePath(
+                                    node = node,
+                                    screenWidth = screenW,
+                                    screenHeight = screenH,
+                                    antiDetectionEnabled = antiDetect
+                                )
+                                val holdMs = GestureRandomizer.resolveHoldDurationMs(node, antiDetect)
 
                                 service.dispatchGestureAccurate(
                                     path = path,
@@ -146,9 +150,8 @@ class SequenceExecutionEngine(private val context: Context) {
                                 skippedCount++
                             }
 
-                            // 다음 입력 전 대기 시간 + OS 씹힘 방지 최소 쿨다운 적용
-                            val delayMs = GestureRandomizer.resolveNextDelayMs(node)
-                            val totalWait = maxOf(delayMs, config.minSafeCooldownMs)
+                            val delayMs = GestureRandomizer.resolveNextDelayMs(node, antiDetect)
+                            val totalWait = maxOf(delayMs, liveConfig.minSafeCooldownMs)
                             if (totalWait > 0L) {
                                 var remaining = totalWait
                                 while (isActive && remaining > 0L) {

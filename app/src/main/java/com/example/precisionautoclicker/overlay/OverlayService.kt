@@ -45,6 +45,7 @@ class OverlayService : Service() {
         const val EXTRA_MIN_COOLDOWN_MS = "extra_min_cooldown_ms"
         const val EXTRA_PAUSE_ON_EXT_TOUCH = "extra_pause_on_ext_touch"
         const val EXTRA_EXT_RESUME_DELAY_MS = "extra_ext_resume_delay_ms"
+        const val EXTRA_ANTI_DETECTION = "extra_anti_detection"
         private const val CHANNEL_ID = "auto_clicker_overlay_channel"
         private const val NOTIF_ID = 1001
     }
@@ -66,7 +67,6 @@ class OverlayService : Service() {
     private var isRunning = false
     private var isMarkersHidden = false
 
-    // 화면 꺼짐(ACTION_SCREEN_OFF) 감지 시 즉시 자동 정지하는 리시버
     private val screenOffReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == Intent.ACTION_SCREEN_OFF && isRunning) {
@@ -93,13 +93,20 @@ class OverlayService : Service() {
                 globalCycles = it.getIntExtra(EXTRA_GLOBAL_CYCLES, 0).coerceAtLeast(0),
                 minSafeCooldownMs = it.getLongExtra(EXTRA_MIN_COOLDOWN_MS, 12L).coerceAtLeast(0L),
                 pauseOnExternalTouch = it.getBooleanExtra(EXTRA_PAUSE_ON_EXT_TOUCH, true),
-                externalTouchResumeDelayMs = it.getLongExtra(EXTRA_EXT_RESUME_DELAY_MS, 1500L).coerceAtLeast(200L)
+                externalTouchResumeDelayMs = it.getLongExtra(EXTRA_EXT_RESUME_DELAY_MS, 1500L).coerceAtLeast(200L),
+                antiDetectionEnabled = it.getBooleanExtra(EXTRA_ANTI_DETECTION, true)
             )
+            refreshAntiDetectButton()
         }
         return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    private fun refreshAntiDetectButton() {
+        val btn = controlBarView?.findViewById<Button>(R.id.btnAntiDetectToggle) ?: return
+        btn.text = if (executionConfig.antiDetectionEnabled) "방지:ON" else "방지:OFF"
+    }
 
     private fun observeEngineStatus() {
         uiScope.launch {
@@ -193,6 +200,7 @@ class OverlayService : Service() {
         }
 
         val btnPlayStop = view.findViewById<Button>(R.id.btnPlayStop)
+        val btnAntiDetectToggle = view.findViewById<Button>(R.id.btnAntiDetectToggle)
         val btnAddClick = view.findViewById<Button>(R.id.btnAddClick)
         val btnAddDrag = view.findViewById<Button>(R.id.btnAddDrag)
         val btnRemoveLast = view.findViewById<Button>(R.id.btnRemoveLast)
@@ -223,6 +231,14 @@ class OverlayService : Service() {
                 }
                 else -> false
             }
+        }
+
+        btnAntiDetectToggle.setOnClickListener {
+            val next = !executionConfig.antiDetectionEnabled
+            executionConfig = executionConfig.copy(antiDetectionEnabled = next)
+            refreshAntiDetectButton()
+            val msg = if (next) "탐지 방지 ON (랜덤·흔들림·곡선 적용)" else "탐지 방지 OFF (정확한 고정 좌표·시간)"
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
 
         btnAddClick.setOnClickListener {
@@ -279,6 +295,7 @@ class OverlayService : Service() {
 
         windowManager.addView(view, params)
         controlBarView = view
+        refreshAntiDetectButton()
     }
 
     private fun toggleMarkersVisibility(btnToggleHide: Button) {
@@ -355,6 +372,7 @@ class OverlayService : Service() {
         nodes.addAll(loadedNodes)
         nextNodeId = (loadedNodes.maxOfOrNull { it.id } ?: 0L) + 1L
         executionConfig = loadedConfig
+        refreshAntiDetectButton()
         syncMarkersAttachedState()
         syncDragLineOverlay()
     }
@@ -497,7 +515,8 @@ class OverlayService : Service() {
             sizePx,
             overlayWindowType(),
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
@@ -510,6 +529,7 @@ class OverlayService : Service() {
         var downX = 0f
         var downY = 0f
         var isDragging = false
+        val loc = IntArray(2)
 
         tv.setOnTouchListener { _, event ->
             if (isRunning) return@setOnTouchListener false
@@ -531,12 +551,16 @@ class OverlayService : Service() {
                     params.x = initX + dx.toInt()
                     params.y = initY + dy.toInt()
                     windowManager.updateViewLayout(tv, params)
-                    onMoved(params.x + sizePx / 2f, params.y + sizePx / 2f)
+                    tv.getLocationOnScreen(loc)
+                    onMoved(loc[0] + sizePx / 2f, loc[1] + sizePx / 2f)
                     true
                 }
                 MotionEvent.ACTION_UP -> {
                     if (!isDragging) {
                         onTapped()
+                    } else {
+                        tv.getLocationOnScreen(loc)
+                        onMoved(loc[0] + sizePx / 2f, loc[1] + sizePx / 2f)
                     }
                     true
                 }
@@ -545,6 +569,12 @@ class OverlayService : Service() {
         }
 
         windowManager.addView(tv, params)
+        tv.post {
+            tv.getLocationOnScreen(loc)
+            if (loc[0] != 0 || loc[1] != 0) {
+                onMoved(loc[0] + sizePx / 2f, loc[1] + sizePx / 2f)
+            }
+        }
         return tv to params
     }
 
